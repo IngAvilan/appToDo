@@ -1,5 +1,5 @@
 export interface ITask {
     id: number;
     title: string;
-    done: boolean;
+    status: 'sin hacer' | 'en curso' | 'terminado';
 }

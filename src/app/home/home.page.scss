@@ -1,0 +1,29 @@
+#container {
+  padding: 10px;
+}
+
+ion-list {
+  background: transparent;
+}
+
+ion-item-sliding {
+  margin-bottom: 10px;
+  border-radius: 8px;
+  overflow: hidden; // Para que el radio del borde se respete
+}
+
+ion-item {
+  --background: #fdfdfd;
+  --border-radius: 8px;
+}
+
+ion-badge {
+  margin-top: 8px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+h2 {
+  font-weight: 600 !important;
+}

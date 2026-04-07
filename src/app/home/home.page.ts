@@ -18,10 +18,8 @@ export class HomePage {
 
   async ngOnInit() {
     await this._Storage.create();
-
-    const tasks = await this._Storage.get('tasks');
-
-    this.tasks = tasks ? JSON.parse(tasks) : [];
+    const savedTasks = await this._Storage.get('tasks');
+    this.tasks = savedTasks ? JSON.parse(savedTasks) : [];
   }
 
   async open() {
@@ -31,39 +29,56 @@ export class HomePage {
         {
           type: 'text',
           name: 'title',
-          placeholder: 'Ingrese tarea'
+          placeholder: '¿Qué hay que hacer?'
         }
       ],
-      buttons: [{
-        text: 'Cancelar',
-        role: 'cancel'
-      },
-      {
-        text: 'Agregar',
-        handler: (data) => {
-          if (data.title.trim() === '') {
-            this.isToastOpen = true;
-            return;
-          }
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Agregar',
+          handler: (data) => {
+            if (data.title.trim() === '') {
+              this.isToastOpen = true;
+              return;
+            }
 
-          this.tasks.push({
-            id: this.tasks.length + 1,
-            title: data.title,
-            done: false
-          });
-          this.saveTask();
+            this.tasks.push({
+              id: Date.now(), // Genera un ID único basado en el tiempo
+              title: data.title,
+              status: 'sin hacer'
+            });
+            this.saveTask();
+          }
         }
-      }]
+      ]
     });
 
     await alert.present();
   }
-  private async saveTask(){
+
+  // Guarda el estado actual del arreglo en el almacenamiento local
+  private async saveTask() {
     await this._Storage.set('tasks', JSON.stringify(this.tasks));
   }
-  deleteTask(task: ITask){
-    console.log(task);
+
+  // Elimina la tarea filtrando el arreglo
+  deleteTask(task: ITask) {
+    this.tasks = this.tasks.filter(t => t.id !== task.id);
+    this.saveTask();
   }
+
+  // Cambia el estado de forma cíclica
+  changeStatus(task: ITask) {
+    if (task.status === 'sin hacer') {
+      task.status = 'en curso';
+    } else if (task.status === 'en curso') {
+      task.status = 'terminado';
+    } else {
+      task.status = 'sin hacer';
+    }
+    this.saveTask();
+  }
+
   setOpen(isOpen: boolean) {
     this.isToastOpen = isOpen;
   }
