@@ -1,65 +1,115 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
-    <ion-title>Mis Tareas</ion-title>
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar class="ios-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="openCalendar()">
+        <ion-icon slot="icon-only" name="calendar" class="accent-icon"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    
+    <ion-title>Raven</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="confirmClearAll()">
+        <ion-icon slot="icon-only" name="ellipsis-horizontal-circle" class="accent-icon"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar *ngIf="showSearchBar" class="ios-toolbar search-animation">
+    <div class="search-wrapper">
+      <ion-searchbar 
+        placeholder="Search tasks..." 
+        mode="ios" 
+        search-icon="none"
+        (ionInput)="searchTasks($event)"
+        show-cancel-button="never"
+        class="custom-searchbar">
+      </ion-searchbar>
+    </div>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Mis Tareas</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="ios-content">
+  <ion-refresher slot="fixed" (ionRefresh)="handleToggleSearch($event)" mode="ios">
+    <ion-refresher-content pullingIcon="chevron-down-circle-outline"></ion-refresher-content>
+  </ion-refresher>
 
-  <ion-toast 
-    [isOpen]="isToastOpen" 
-    message="Tarea sin descripción" 
-    [duration]="3000" 
-    (didDismiss)="setOpen(false)"
-    position="top">
-  </ion-toast>
+  <div class="main-body">
+    <div class="priority-section" *ngIf="getMostUrgentTask() as urgent">
+      <div class="section-label">PRIORITY THREAD</div>
+      <ion-card class="urgent-card">
+        <ion-card-header>
+          <div class="urgent-header-row">
+            <div class="urgent-badge"><ion-icon name="flash"></ion-icon> CRITICAL</div>
+            <div class="priority-label" [style.color]="getPriorityColorCode(urgent.priority)">
+              {{ urgent.priority | uppercase }}
+            </div>
+          </div>
+        </ion-card-header>
+        <ion-card-content>
+          <h1>{{ urgent.title }}</h1>
+          <div class="meta-row">
+            <span><ion-icon name="folder-outline"></ion-icon> {{ urgent.category }}</span>
+            <span><ion-icon name="calendar-outline"></ion-icon> {{ urgent.dueDate | date:'dd MMM' }}</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
 
-  <div id="container">
-    <ion-list>
-      <!-- Mensaje si no hay tareas -->
-      <ion-item *ngIf="tasks.length === 0" lines="none">
-        <ion-label class="ion-text-center">
-          <p>No tienes tareas pendientes. ¡Buen trabajo!</p>
-        </ion-label>
-      </ion-item>
+    <div class="segment-container">
+      <ion-segment [(ngModel)]="filterStatus" (ionChange)="filterTasks()" mode="ios">
+        <ion-segment-button value="todo"><ion-label>TODO</ion-label></ion-segment-button>
+        <ion-segment-button value="in-progress"><ion-label>DEBUG</ion-label></ion-segment-button>
+        <ion-segment-button value="completed"><ion-label>DONE</ion-label></ion-segment-button>
+      </ion-segment>
+    </div>
 
-      <ion-item-sliding *ngFor="let task of tasks">
-        <!-- Lado Izquierdo: Acción de cambiar estado -->
-        <ion-item-options side="start">
-          <ion-item-option (click)="changeStatus(task)" color="secondary">
-            <ion-icon slot="top" name="sync"></ion-icon>
-            Estado
-          </ion-item-option>
-        </ion-item-options>
+    <div class="task-container">
+      <ion-list lines="none" class="ios-list">
+        <ion-item-sliding *ngFor="let task of filteredTasks">
+          <ion-item class="ios-item">
+            <ion-label>
+              <h2>{{ task.title }}</h2>
+              <p>{{ task.category }} • {{ task.dueDate | date:'shortTime' }}</p>
+            </ion-label>
+            <div slot="end" class="priority-dot" [style.background-color]="getPriorityColorCode(task.priority)"></div>
+          </ion-item>
 
-        <ion-item>
-          <ion-label>
-            <h2>{{ task.title }}</h2>
-            <ion-badge [color]="task.status === 'terminado' ? 'success' : (task.status === 'en curso' ? 'warning' : 'medium')">
-              {{ task.status }}
-            </ion-badge>
-          </ion-label>
-        </ion-item>
-
-        <!-- Lado Derecho: Acción de eliminar -->
-        <ion-item-options side="end">
-          <ion-item-option color="danger" (click)="deleteTask(task)">
-            <ion-icon slot="top" name="trash"></ion-icon>
-            Eliminar
-          </ion-item-option>
-        </ion-item-options>
-      </ion-item-sliding>
-    </ion-list>
-
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button (click)="open()">
-        <ion-icon name="add"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
+          <ion-item-options side="end">
+            <ion-item-option color="primary" (click)="changeStatus(task, 'in-progress')" *ngIf="task.status !== 'in-progress'">
+              <ion-icon slot="icon-only" name="play"></ion-icon>
+            </ion-item-option>
+            <ion-item-option color="success" (click)="changeStatus(task, 'completed')" *ngIf="task.status !== 'completed'">
+              <ion-icon slot="icon-only" name="checkmark-done"></ion-icon>
+            </ion-item-option>
+            <ion-item-option color="danger" (click)="deleteTask(task)">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+    </div>
   </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button class="ios-fab" (click)="openAddTask()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-modal [isOpen]="isCalendarOpen" (didDismiss)="isCalendarOpen = false" mode="ios" class="calendar-modal">
+    <ng-template>
+      <ion-header class="ion-no-border">
+        <ion-toolbar class="ios-toolbar">
+          <ion-title>Schedule</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isCalendarOpen = false">Done</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ios-content">
+        <ion-datetime presentation="date" mode="ios" [highlightedDates]="highlightedDates" (ionChange)="onDateSelect($event)"></ion-datetime>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

@@ -1,29 +1,54 @@
-#container {
-  padding: 10px;
+$ios-bg: #000000;
+$ios-card-bg: #1c1c1e;
+$ios-accent: #ff9f0a;
+
+.ios-content { --background: #{$ios-bg}; background-color: $ios-bg; }
+.ios-toolbar { --background: #{$ios-bg}; --color: white; }
+.accent-icon { color: $ios-accent !important; font-size: 1.4rem; }
+
+.search-wrapper { padding: 0 16px 10px; }
+.custom-searchbar {
+    --background: #1c1c1e;
+    --border-radius: 12px;
+    --color: #ffffff;
+    padding: 0;
+    height: 44px;
 }
 
-ion-list {
-  background: transparent;
+.priority-section {
+    margin-top: -15px; // Eleva el recuadro
+    padding: 0 16px;
+    .section-label { color: #8e8e93; font-size: 0.7rem; font-weight: 700; margin-bottom: 8px; }
 }
 
-ion-item-sliding {
-  margin-bottom: 10px;
-  border-radius: 8px;
-  overflow: hidden; // Para que el radio del borde se respete
+.urgent-card {
+    background: linear-gradient(145deg, #2c2c2e, #1c1c1e);
+    border-radius: 24px;
+    border: 1px solid #333;
+    margin: 0;
+    .urgent-header-row { display: flex; justify-content: space-between; align-items: center; }
+    .priority-label { font-size: 0.75rem; font-weight: 700; }
+    h1 { color: white; font-size: 1.8rem; margin: 15px 0; }
+    .meta-row { display: flex; gap: 15px; color: #8e8e93; font-size: 0.9rem; }
 }
 
-ion-item {
-  --background: #fdfdfd;
-  --border-radius: 8px;
+.task-container {
+    padding: 16px;
+    background-color: transparent;
+    ion-list { background: transparent !important; }
+    ion-item-sliding { background: $ios-card-bg; border-radius: 14px; margin-bottom: 12px; overflow: hidden; }
+    .ios-item { --background: transparent; --color: white; }
 }
 
-ion-badge {
-  margin-top: 8px;
-  padding: 5px 10px;
-  font-size: 0.8rem;
-  text-transform: uppercase;
+ion-segment {
+    --background: #1c1c1e;
+    margin: 10px 16px;
+    ion-segment-button { --color: #8e8e93; --color-checked: #ffffff; --indicator-color: #3a3a3c; }
 }
 
-h2 {
-  font-weight: 600 !important;
-}
+.priority-dot { width: 10px; height: 10px; border-radius: 50%; }
+.ios-fab { --background: #{$ios-accent}; --color: black; }
+.calendar-modal { --height: 60%; --border-radius: 20px; }
+
+.search-animation { animation: slideDown 0.3s ease-out; }
+@keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
